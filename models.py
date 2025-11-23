@@ -10,7 +10,7 @@ class CustomerBase(SQLModel):
 class CustomerCreate(CustomerBase):
     pass
 
-class Customer(CustomerBase, SQLModel, table=True):
+class Customer(CustomerBase, table=True):
     id: int | None = None
 
 
