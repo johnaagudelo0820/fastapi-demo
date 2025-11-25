@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 
 from models import Transaction, Invoice, CustomerCreate, Customer
 from db import Sessiondep, create_all_tables
+from sqlmodel import select
 
 # Create the FastAPI app instance
 app = FastAPI(lifespan=create_all_tables)
@@ -37,14 +38,18 @@ db_customers: list[Customer] = []
 @app.post("/customers", response_model=Customer)
 async def create_customer(customer_data: CustomerCreate, session: Sessiondep):
     customer = Customer.model_validate(customer_data.model_dump()) # Convert the CustomerCreate model to a Customer model
+    session.add(customer)
+    session.commit()
+    session.refresh(customer)
+
     # Simulate the database id
-    customer.id = len(db_customers) + 1
-    db_customers.append(customer)
+    # customer.id = len(db_customers) + 1
+    # db_customers.append(customer)
     return customer
 
 @app.get("/customers", response_model=list[Customer])
-async def get_customers():
-    return db_customers
+async def get_customers(session: Sessiondep):
+    return session.exec(select(Customer)).all()
 
 @app.get("/customers/{customer_id}", response_model=Customer)
 async def get_customer(customer_id: int):
