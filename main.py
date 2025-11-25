@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -41,11 +41,15 @@ async def create_customer(customer_data: CustomerCreate, session: Sessiondep):
     session.add(customer)
     session.commit()
     session.refresh(customer)
-
-    # Simulate the database id
-    # customer.id = len(db_customers) + 1
-    # db_customers.append(customer)
     return customer
+
+@app.get("/customers/{customer_id}", response_model=Customer)
+async def read_customer(customer_id: int, session: Sessiondep):
+    customer_db = session.get(Customer, customer_id)
+    if not customer_db:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
+    
+    return customer_db
 
 @app.get("/customers", response_model=list[Customer])
 async def get_customers(session: Sessiondep):
