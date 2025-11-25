@@ -3,10 +3,10 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from models import Transaction, Invoice, CustomerCreate, Customer
-from db import Sessiondep
+from db import Sessiondep, create_all_tables
 
 # Create the FastAPI app instance
-app = FastAPI()
+app = FastAPI(lifespan=create_all_tables)
 
 # Define the root endpoint
 @app.get("/")
