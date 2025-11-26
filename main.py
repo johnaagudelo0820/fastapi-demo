@@ -48,8 +48,16 @@ async def read_customer(customer_id: int, session: Sessiondep):
     customer_db = session.get(Customer, customer_id)
     if not customer_db:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
-    
     return customer_db
+
+@app.delete("/customers/{customer_id}", response_model=Customer)
+async def delete_customer(customer_id: int, session: Sessiondep):
+    customer_db = session.get(Customer, customer_id)
+    if not customer_db:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
+    session.delete(customer_db)
+    session.commit()
+    return {"detail": "Customer deleted successfully"}
 
 @app.get("/customers", response_model=list[Customer])
 async def get_customers(session: Sessiondep):
