@@ -1,14 +1,8 @@
-__pycache__/main.cpython-313.pyc
-__pycache__/models.cpython-313.pyc
-
 *.sqlite3
 db.sqlite3
-__pycache__/db.cpython-313.pyc
 
 
 __pycache__/*
-app/routers/__pycache__/__init__.cpython-313.pyc
-.gitignore
-app/__pycache__/main.cpython-313.pyc
-app/__pycache__/__init__.cpython-313.pyc
-app/routers/__pycache__/customers.cpython-313.pyc
+app/__pycache__/*
+app/routers/__pycache__/*
+
