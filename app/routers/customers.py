@@ -1,6 +1,7 @@
+from models import CustomerPlan
 from fastapi import APIRouter, HTTPException, status
 
-from models import Customer, CustomerCreate, CustomerUpdate
+from models import Customer, CustomerCreate, CustomerUpdate, Plan
 from db import Sessiondep
 
 from sqlmodel import select
@@ -24,8 +25,8 @@ async def read_customer(customer_id: int, session: Sessiondep):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
     return customer_db
 
-@router.patch("/customers/{cusomer_is}", response_model=Customer, status_code=status.HTTP_201_CREATED, tags=["customers"])
-async def update_customer(customer_id: int, customer_data: CustomerUpdate,session: Sessiondep):
+@router.patch("/customers/{cusomer_id}", response_model=Customer, status_code=status.HTTP_201_CREATED, tags=["customers"])
+async def update_customer(customer_id: int, customer_data: CustomerUpdate, session: Sessiondep):
     customer_db = session.get(Customer, customer_id)
     if not customer_db:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
@@ -51,3 +52,28 @@ async def delete_customer(customer_id: int, session: Sessiondep):
 @router.get("/customers", response_model=list[Customer], tags=["customers"])
 async def get_customers(session: Sessiondep):
     return session.exec(select(Customer)).all()
+
+@router.post("/customers/{customer_id}/plans/{plan_id}", tags=["customers"])
+async def suscribe_customer_to_plan(customer_id: int, plan_id: int, session: Sessiondep):
+    customer_db = session.get(Customer, customer_id)
+    if not customer_db:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
+    plan_db = session.get(Plan, plan_id)
+    if not plan_db:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plan not found")
+    
+    customer_plan_db = CustomerPlan(plan_id=plan_db.id, customer_id=customer_db.id)
+    session.add(customer_plan_db)
+    session.commit()
+    session.refresh(customer_plan_db)
+
+    return customer_plan_db
+
+
+@router.get("/customers/{customer_id}/plans", tags=["customers"])
+async def suscribe_customer_to_plan(customer_id: int, session: Sessiondep):
+    customer_db = session.get(Customer, customer_id)
+    if not customer_db:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
+
+    return customer_db.plans
