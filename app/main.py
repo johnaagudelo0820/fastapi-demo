@@ -1,6 +1,7 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Request
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import time
 
 from db import create_all_tables
 from sqlmodel import select
@@ -13,6 +14,14 @@ app.include_router(customers.router)
 app.include_router(transactions.router)
 app.include_router(invoices.router)
 app.include_router(plans.router)
+
+@app.middleware("http")
+async def log_request_time(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    print(f"Request: {request.method} {request.url} completed in {process_time:.4f} seconds")
+    return response
 
 # Define the root endpoint
 @app.get("/")
@@ -28,7 +37,7 @@ country_timezones = {
 }
 
 @app.get("/time/{timezone}")
-async def time(timezone: str):
+async def time_by_timezone(timezone: str):
     iso = timezone.upper()
     timezone_iso = country_timezones.get(iso)
     
