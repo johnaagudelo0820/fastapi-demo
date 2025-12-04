@@ -5,4 +5,5 @@ db.sqlite3
 __pycache__/*
 app/__pycache__/*
 app/routers/__pycache__/*
+app/tests/__pycache__/*
 
