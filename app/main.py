@@ -2,6 +2,9 @@ from fastapi import FastAPI, HTTPException, status, Request
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import time
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from typing import Annotated
+from fastapi import Depends
 
 from db import create_all_tables
 from sqlmodel import select
@@ -23,10 +26,19 @@ async def log_request_time(request: Request, call_next):
     print(f"Request: {request.method} {request.url} completed in {process_time:.4f} seconds")
     return response
 
+security = HTTPBasic()
+
 # Define the root endpoint
 @app.get("/")
-async def root():
-    return {"message": "Hello, John!"}
+async def root(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
+    print(credentials)
+    if credentials.username != "john" or credentials.password != "12345":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return {"message": f"Hello, {credentials.username}!"}
 
 country_timezones = {
     "CO": "America/Bogota",
