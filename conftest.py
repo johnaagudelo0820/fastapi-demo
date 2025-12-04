@@ -9,9 +9,13 @@ from db import get_session
 SQLLITE_NAME = "db.sqlite3"
 SQLITE_URL = f"sqlite:///{SQLLITE_NAME}"
 
-engine = create_engine(SQLITE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool)
+engine = create_engine(
+    SQLITE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def session_fixture():
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
@@ -19,8 +23,8 @@ def session_fixture():
     SQLModel.metadata.drop_all(engine)
 
 
-@pytest.fixture(scope="session")
-def client_fixture(session_fixture: Session):
+@pytest.fixture(scope="function")
+def client(session_fixture: Session):
     def get_session_override():
         return session_fixture
 
